@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lubricentro LR | Consulta de Service</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape shape-1" aria-hidden="true"></div>
+    <div class="bg-shape shape-2" aria-hidden="true"></div>
+
+    <header class="hero">
+      <div class="hero-logo-wrap" aria-hidden="true">
+        <img class="hero-logo" src="assets/logo.jpeg" alt="Logo Lubricentro LR" />
+      </div>
+      <p class="eyebrow">Lubricentro LR</p>
+      <h1>Consulta tu service por patente</h1>
+      <p class="subtitle">
+        Ingresa la patente de tu auto y revisa el ultimo trabajo realizado y la
+        fecha estimada del proximo servicio.
+      </p>
+    </header>
+
+    <main class="panel">
+      <nav class="mode-switch" aria-label="Modos de uso">
+        <button id="tab-customer" class="tab-btn is-active" type="button">Cliente</button>
+        <button id="tab-owner" class="tab-btn" type="button">Panel dueno</button>
+      </nav>
+
+      <section id="customer-view">
+        <form id="search-form" class="search-form" autocomplete="off">
+          <label for="patente">Patente</label>
+          <div class="input-row">
+            <input
+              id="patente"
+              name="patente"
+              type="text"
+              placeholder="Ej: AB123CD o AAA123"
+              maxlength="8"
+              required
+            />
+            <button type="submit">Consultar</button>
+          </div>
+          <small>Formato flexible. Puedes escribir con o sin espacios.</small>
+        </form>
+
+        <section id="result" class="result hidden" aria-live="polite">
+          <div class="card">
+            <h2>Datos del ultimo service</h2>
+            <p><span>Patente:</span> <strong id="res-patente">-</strong></p>
+            <p><span>Cliente:</span> <strong id="res-cliente">-</strong></p>
+            <p><span>Trabajo realizado:</span> <strong id="res-trabajo">-</strong></p>
+            <p><span>Fecha service:</span> <strong id="res-fecha">-</strong></p>
+          </div>
+
+          <div class="card next-service">
+            <h2>Proximo service sugerido</h2>
+            <p class="next-date" id="res-proximo">-</p>
+            <p><span>Kilometraje estimado:</span> <strong id="res-proximo-km">-</strong></p>
+            <p class="hint">Te recomendamos reservar turno con anticipacion.</p>
+          </div>
+        </section>
+
+        <section id="history" class="history card hidden">
+          <h2>Historial (ultimos 10 services)</h2>
+          <ul id="res-history-list" class="history-list"></ul>
+        </section>
+
+        <section id="empty" class="empty hidden" aria-live="polite">
+          <h2>No encontramos esa patente</h2>
+          <p>
+            Verifica los datos e intenta nuevamente. Si persiste, contacta al
+            lubricentro para actualizar el historial.
+          </p>
+        </section>
+      </section>
+
+      <section id="owner-view" class="hidden" aria-live="polite">
+        <div class="owner-head">
+          <h2>Carga de services</h2>
+          <p>
+            Desde aqui el dueno puede agregar, editar o borrar registros. Los
+            datos se guardan en este navegador.
+          </p>
+        </div>
+
+        <form id="owner-form" class="owner-form" autocomplete="off">
+          <div class="form-grid">
+            <label>
+              Patente
+              <input id="owner-patente" type="text" maxlength="8" required />
+            </label>
+            <label>
+              Cliente
+              <input id="owner-cliente" type="text" required />
+            </label>
+            <fieldset class="full owner-checklist">
+              <legend>Checklist del servicio</legend>
+
+              <div class="checklist-text-grid">
+                <label>
+                  Aceite
+                  <input id="owner-aceite" type="text" placeholder="Ej: 5W30 sintetico" />
+                </label>
+                <label>
+                  Aditivo Carter
+                  <input id="owner-aditivo-carter" type="text" placeholder="Opcional" />
+                </label>
+                <label>
+                  Aditivo Transmision
+                  <input id="owner-aditivo-transmision" type="text" placeholder="Opcional" />
+                </label>
+                <label>
+                  Aditivo Combustible
+                  <input id="owner-aditivo-combustible" type="text" placeholder="Opcional" />
+                </label>
+              </div>
+
+              <div class="checklist-rows">
+                <div class="check-row" data-check-key="filtro-aceite" data-check-label="Filtro de Aceite">
+                  <span>Filtro de Aceite</span>
+                  <label><input type="radio" name="check-filtro-aceite" value="si" /> SI</label>
+                  <label><input type="radio" name="check-filtro-aceite" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="filtro-combustible" data-check-label="Filtro de Combustible">
+                  <span>Filtro de Combustible</span>
+                  <label><input type="radio" name="check-filtro-combustible" value="si" /> SI</label>
+                  <label><input type="radio" name="check-filtro-combustible" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="caja-velocidad" data-check-label="Caja Velocidad">
+                  <span>Caja Velocidad</span>
+                  <label><input type="radio" name="check-caja-velocidad" value="si" /> SI</label>
+                  <label><input type="radio" name="check-caja-velocidad" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="diferencial-trasero" data-check-label="Diferencial Trasero">
+                  <span>Diferencial Trasero</span>
+                  <label><input type="radio" name="check-diferencial-trasero" value="si" /> SI</label>
+                  <label><input type="radio" name="check-diferencial-trasero" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="filtro-aire" data-check-label="Filtro de Aire">
+                  <span>Filtro de Aire</span>
+                  <label><input type="radio" name="check-filtro-aire" value="si" /> SI</label>
+                  <label><input type="radio" name="check-filtro-aire" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="filtro-polen" data-check-label="Filtro Polen">
+                  <span>Filtro Polen</span>
+                  <label><input type="radio" name="check-filtro-polen" value="si" /> SI</label>
+                  <label><input type="radio" name="check-filtro-polen" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="caja-transfer" data-check-label="Caja Transfer">
+                  <span>Caja Transfer</span>
+                  <label><input type="radio" name="check-caja-transfer" value="si" /> SI</label>
+                  <label><input type="radio" name="check-caja-transfer" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="diferencial-delantero" data-check-label="Diferencial Delantero">
+                  <span>Diferencial Delantero</span>
+                  <label><input type="radio" name="check-diferencial-delantero" value="si" /> SI</label>
+                  <label><input type="radio" name="check-diferencial-delantero" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="liquido-freno" data-check-label="Cambio Liquido Freno">
+                  <span>Cambio Liquido Freno</span>
+                  <label><input type="radio" name="check-liquido-freno" value="si" /> SI</label>
+                  <label><input type="radio" name="check-liquido-freno" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="bujias" data-check-label="Cambio Bujias">
+                  <span>Cambio Bujias</span>
+                  <label><input type="radio" name="check-bujias" value="si" /> SI</label>
+                  <label><input type="radio" name="check-bujias" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="bateria" data-check-label="Cambio Bateria">
+                  <span>Cambio Bateria</span>
+                  <label><input type="radio" name="check-bateria" value="si" /> SI</label>
+                  <label><input type="radio" name="check-bateria" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="liquido-refrigerante" data-check-label="Cambio Liquido Refrigerante">
+                  <span>Cambio Liquido Refrigerante</span>
+                  <label><input type="radio" name="check-liquido-refrigerante" value="si" /> SI</label>
+                  <label><input type="radio" name="check-liquido-refrigerante" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="engrase" data-check-label="Engrase">
+                  <span>Engrase</span>
+                  <label><input type="radio" name="check-engrase" value="si" /> SI</label>
+                  <label><input type="radio" name="check-engrase" value="no" /> NO</label>
+                </div>
+                <div class="check-row" data-check-key="liquido-hidraulico" data-check-label="Cambio Liquido Hidraulico">
+                  <span>Cambio Liquido Hidraulico</span>
+                  <label><input type="radio" name="check-liquido-hidraulico" value="si" /> SI</label>
+                  <label><input type="radio" name="check-liquido-hidraulico" value="no" /> NO</label>
+                </div>
+              </div>
+            </fieldset>
+            <label class="full">
+              Detalle de lo realizado
+              <textarea id="owner-trabajo-detalle" rows="3" placeholder="Ej: Se uso aceite sintetico 5W30, se reviso perdida en reten delantero."></textarea>
+            </label>
+            <label>
+              Fecha del service
+              <input id="owner-fecha" type="date" required />
+            </label>
+            <label>
+              Proximo service (meses)
+              <input id="owner-meses" type="number" min="1" max="24" value="6" required />
+            </label>
+            <label>
+              Proximo service (km)
+              <input id="owner-km" type="number" min="1" step="1" placeholder="Ej: 85000" required />
+            </label>
+          </div>
+
+          <div class="owner-actions">
+            <button type="submit" id="owner-submit">Guardar registro</button>
+            <button type="button" id="owner-cancel" class="btn-muted hidden">Cancelar edicion</button>
+          </div>
+          <p id="owner-form-status" class="owner-form-status"></p>
+        </form>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Patente</th>
+                <th>Cliente</th>
+                <th>Fecha service</th>
+                <th>Proximo service</th>
+                <th>Proximo km</th>
+                <th>Historial</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="owner-table-body"></tbody>
+          </table>
+        </div>
+
+        <section id="owner-history" class="owner-history hidden">
+          <h3 id="owner-history-title">Historial de patente</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Trabajo</th>
+                  <th>Proximo</th>
+                  <th>Proximo km</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="owner-history-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <p>Horarios: Lun a Vie 08:00 - 18:00 | Sab 08:00 - 13:00</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
