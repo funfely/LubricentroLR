@@ -1,5 +1,7 @@
 const STORAGE_KEY = "lubricentro-services-v1";
 const MAX_HISTORY = 10;
+const OWNER_PASSWORD_SALT = 17;
+const OWNER_PASSWORD_BYTES = [93, 99, 67, 65, 67, 71];
 
 const defaultServices = {
   AB123CD: [
@@ -36,6 +38,7 @@ const defaultServices = {
 
 let selectedPlate = null;
 let editingEntry = null;
+let ownerPanelUnlocked = false;
 
 const customerView = document.getElementById("customer-view");
 const ownerView = document.getElementById("owner-view");
@@ -117,6 +120,10 @@ function formatKm(value) {
 
 function buildServiceId() {
   return `svc-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
+function decodeOwnerPassword() {
+  return OWNER_PASSWORD_BYTES.map((value) => String.fromCharCode(value - OWNER_PASSWORD_SALT)).join("");
 }
 
 function readCheckValue(key) {
@@ -348,6 +355,26 @@ function switchView(mode) {
   ownerView.classList.toggle("hidden", isCustomer);
   tabCustomer.classList.toggle("is-active", isCustomer);
   tabOwner.classList.toggle("is-active", !isCustomer);
+}
+
+function requestOwnerAccess() {
+  if (ownerPanelUnlocked) {
+    return true;
+  }
+
+  const typedPassword = window.prompt("Ingresa la clave del panel administrativo:");
+
+  if (!typedPassword) {
+    return false;
+  }
+
+  if (typedPassword !== decodeOwnerPassword()) {
+    window.alert("Clave incorrecta. No tienes acceso al panel administrativo.");
+    return false;
+  }
+
+  ownerPanelUnlocked = true;
+  return true;
 }
 
 function clearOwnerForm() {
@@ -609,6 +636,11 @@ ownerHistoryBody.addEventListener("click", (event) => {
 });
 
 tabCustomer.addEventListener("click", () => switchView("customer"));
-tabOwner.addEventListener("click", () => switchView("owner"));
+tabOwner.addEventListener("click", () => {
+  if (!requestOwnerAccess()) {
+    return;
+  }
+  switchView("owner");
+});
 
 renderOwnerTable();
