@@ -485,6 +485,110 @@ footer {
   font-size: 0.95rem;
 }
 
+.customer-hours {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #3f2f1f;
+  background: linear-gradient(135deg, rgba(255, 236, 206, 0.95), rgba(255, 247, 235, 0.95));
+  border: 1px solid #e6cda7;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 16px rgba(78, 56, 26, 0.12);
+}
+
+.whatsapp-float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  min-height: 58px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px 10px 12px;
+  background: #25d366;
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  z-index: 20;
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+  animation: wa-pop-in 420ms ease-out both, wa-pulse 2.2s ease-in-out 1.4s infinite;
+}
+
+.whatsapp-float::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 2px solid rgba(37, 211, 102, 0.42);
+  opacity: 0;
+  animation: wa-ring 2.2s ease-out 1.4s infinite;
+}
+
+.wa-label {
+  font-family: "Sora", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.whatsapp-float:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
+  filter: brightness(1.02);
+}
+
+.whatsapp-float:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.whatsapp-float svg {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  fill: currentColor;
+}
+
+@keyframes wa-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes wa-pulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.02);
+  }
+}
+
+@keyframes wa-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -582,5 +686,33 @@ footer {
   .hero-logo {
     width: 100px;
     height: 100px;
+  }
+
+  .customer-hours {
+    font-size: 1rem;
+    padding: 10px 12px;
+  }
+
+  .whatsapp-float {
+    min-height: 54px;
+    padding: 10px 12px;
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .wa-label {
+    display: none;
+  }
+
+  .whatsapp-float svg {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-float,
+  .whatsapp-float::after {
+    animation: none;
   }
 }
