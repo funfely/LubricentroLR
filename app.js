@@ -60,6 +60,7 @@ const ownerHistoryBody = document.getElementById("owner-history-body");
 
 const ownerPlateInput = document.getElementById("owner-patente");
 const ownerClienteInput = document.getElementById("owner-cliente");
+const ownerModelInput = document.getElementById("owner-model");
 const ownerFechaInput = document.getElementById("owner-fecha");
 const ownerCurrentKmInput = document.getElementById("owner-km-actual");
 const ownerKmInput = document.getElementById("owner-km");
@@ -316,6 +317,7 @@ function normalizeStorageShape(data) {
       .map((item) => ({
         id: item.id || buildServiceId(),
         cliente: item.cliente,
+        model: String(item.model || item.modelo || "").trim(),
         checklist: normalizeChecklist(item.checklist),
         trabajo: item.trabajo,
         fechaService: item.fechaService,
@@ -402,6 +404,7 @@ function renderOwnerTable() {
       return `<tr>
         <td>${plate}</td>
         <td>${lastService ? lastService.cliente : "-"}</td>
+        <td>${lastService ? lastService.model || "-" : "-"}</td>
         <td>${lastService ? formatDisplayDate(lastService.fechaService) : "-"}</td>
         <td>${lastService ? formatKm(lastService.proximoKm) : "-"}</td>
         <td>${history.length} / ${MAX_HISTORY}</td>
@@ -485,6 +488,7 @@ ownerForm.addEventListener("submit", (event) => {
 
   const plate = normalizePlate(ownerPlateInput.value);
   const cliente = ownerClienteInput.value.trim();
+  const model = ownerModelInput.value.trim();
   const fechaService = ownerFechaInput.value;
   const currentKm = ownerCurrentKmInput.value.trim().replace(/\D/g, "");
   const proximoKm = ownerKmInput.value.trim().replace(/\D/g, "");
@@ -504,6 +508,7 @@ ownerForm.addEventListener("submit", (event) => {
   const newEntry = {
     id: editingEntry ? editingEntry.id : buildServiceId(),
     cliente,
+    model,
     checklist,
     trabajo,
     fechaService,
@@ -609,6 +614,7 @@ ownerHistoryBody.addEventListener("click", (event) => {
   editingEntry = { plate, id: serviceId };
   ownerPlateInput.value = plate;
   ownerClienteInput.value = service.cliente;
+  ownerModelInput.value = service.model || "";
   ownerFechaInput.value = service.fechaService;
   ownerCurrentKmInput.value = service.currentKm || "";
   ownerKmInput.value = service.proximoKm || "";
