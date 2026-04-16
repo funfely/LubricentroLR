@@ -10,7 +10,6 @@ const defaultServices = {
       cliente: "Juan Perez",
       trabajo: "Cambio de aceite + Filtro de aceite. Detalle: Aceite 10W40 semisintetico.",
       fechaService: "2026-03-04",
-      proximoService: "2026-09-04",
       proximoKm: "55000",
     },
   ],
@@ -20,7 +19,6 @@ const defaultServices = {
       cliente: "Maria Gomez",
       trabajo: "Cambio de aceite + Filtro de aire.",
       fechaService: "2026-02-20",
-      proximoService: "2026-08-20",
       proximoKm: "62000",
     },
   ],
@@ -30,7 +28,6 @@ const defaultServices = {
       cliente: "Carlos Ruiz",
       trabajo: "Service completo + Revision de fluidos.",
       fechaService: "2026-01-12",
-      proximoService: "2026-07-12",
       proximoKm: "73000",
     },
   ],
@@ -64,7 +61,7 @@ const ownerHistoryBody = document.getElementById("owner-history-body");
 const ownerPlateInput = document.getElementById("owner-patente");
 const ownerClienteInput = document.getElementById("owner-cliente");
 const ownerFechaInput = document.getElementById("owner-fecha");
-const ownerMesesInput = document.getElementById("owner-meses");
+const ownerCurrentKmInput = document.getElementById("owner-km-actual");
 const ownerKmInput = document.getElementById("owner-km");
 const ownerAceiteInput = document.getElementById("owner-aceite");
 const ownerAditivoCarterInput = document.getElementById("owner-aditivo-carter");
@@ -86,18 +83,12 @@ const fields = {
   cliente: document.getElementById("res-cliente"),
   trabajo: document.getElementById("res-trabajo"),
   fecha: document.getElementById("res-fecha"),
-  proximo: document.getElementById("res-proximo"),
+  kmActual: document.getElementById("res-km-actual"),
   proximoKm: document.getElementById("res-proximo-km"),
 };
 
 function normalizePlate(value) {
   return value.toUpperCase().replace(/\s+/g, "").trim();
-}
-
-function addMonths(dateStr, months) {
-  const date = new Date(`${dateStr}T00:00:00`);
-  date.setMonth(date.getMonth() + months);
-  return date.toISOString().slice(0, 10);
 }
 
 function formatDisplayDate(dateStr) {
@@ -328,7 +319,7 @@ function normalizeStorageShape(data) {
         checklist: normalizeChecklist(item.checklist),
         trabajo: item.trabajo,
         fechaService: item.fechaService,
-        proximoService: item.proximoService,
+        currentKm: String(item.currentKm || item.kmActual || "").replace(/\D/g, ""),
         proximoKm: String(item.proximoKm || "").replace(/\D/g, ""),
       }))
       .map((item) => ({
@@ -379,7 +370,6 @@ function requestOwnerAccess() {
 
 function clearOwnerForm() {
   ownerForm.reset();
-  ownerMesesInput.value = "6";
   resetChecklistForm();
   editingEntry = null;
   ownerSubmit.textContent = "Guardar registro";
@@ -413,7 +403,6 @@ function renderOwnerTable() {
         <td>${plate}</td>
         <td>${lastService ? lastService.cliente : "-"}</td>
         <td>${lastService ? formatDisplayDate(lastService.fechaService) : "-"}</td>
-        <td>${lastService ? formatDisplayDate(lastService.proximoService) : "-"}</td>
         <td>${lastService ? formatKm(lastService.proximoKm) : "-"}</td>
         <td>${history.length} / ${MAX_HISTORY}</td>
         <td class="actions">
@@ -442,7 +431,6 @@ function renderOwnerPlateHistory(plate) {
         <td>${index + 1}</td>
         <td>${formatDisplayDate(entry.fechaService)}</td>
         <td>${entry.trabajo}</td>
-        <td>${formatDisplayDate(entry.proximoService)}</td>
         <td>${formatKm(entry.proximoKm)}</td>
         <td class="actions">
           <button type="button" class="row-btn edit" data-action="edit-service" data-plate="${plate}" data-service-id="${entry.id}">Editar</button>
@@ -471,13 +459,13 @@ function renderCustomerResult(plate) {
   fields.cliente.textContent = latest.cliente;
   fields.trabajo.textContent = latest.trabajo;
   fields.fecha.textContent = formatDisplayDate(latest.fechaService);
-  fields.proximo.textContent = formatDisplayDate(latest.proximoService);
+  fields.kmActual.textContent = formatKm(latest.currentKm);
   fields.proximoKm.textContent = formatKm(latest.proximoKm);
 
   historyList.innerHTML = history
     .map(
       (item, index) =>
-        `<li>${index + 1}. ${formatDisplayDate(item.fechaService)} - ${item.trabajo} (proximo: ${formatDisplayDate(item.proximoService)} / ${formatKm(item.proximoKm)})</li>`
+        `<li>${index + 1}. ${formatDisplayDate(item.fechaService)} - ${item.trabajo} (km actual: ${formatKm(item.currentKm)} | proximo km: ${formatKm(item.proximoKm)})</li>`
     )
     .join("");
 
@@ -498,29 +486,28 @@ ownerForm.addEventListener("submit", (event) => {
   const plate = normalizePlate(ownerPlateInput.value);
   const cliente = ownerClienteInput.value.trim();
   const fechaService = ownerFechaInput.value;
-  const meses = Number(ownerMesesInput.value);
+  const currentKm = ownerCurrentKmInput.value.trim().replace(/\D/g, "");
   const proximoKm = ownerKmInput.value.trim().replace(/\D/g, "");
   const checklist = buildChecklistFromForm();
   const trabajo = summarizeChecklist(checklist);
 
-  if (!plate || !cliente || !fechaService || Number.isNaN(meses) || !checklist || !proximoKm) {
-    setOwnerStatus("Completa patente, cliente, fecha, km y al menos un check en SI o detalle de service.");
+  if (!plate || !cliente || !fechaService || !currentKm || !checklist || !proximoKm) {
+    setOwnerStatus("Completa patente, cliente, fecha, kilometraje actual, proximo km y al menos un check en SI o detalle de service.");
     return;
   }
 
-  if (Number(proximoKm) <= 0) {
-    setOwnerStatus("El campo de km debe ser mayor a 0.");
+  if (Number(currentKm) <= 0 || Number(proximoKm) <= 0) {
+    setOwnerStatus("Los kilometrajes deben ser mayores a 0.");
     return;
   }
 
-  const proximoService = addMonths(fechaService, meses);
   const newEntry = {
     id: editingEntry ? editingEntry.id : buildServiceId(),
     cliente,
     checklist,
     trabajo,
     fechaService,
-    proximoService,
+    currentKm,
     proximoKm,
   };
 
@@ -623,7 +610,7 @@ ownerHistoryBody.addEventListener("click", (event) => {
   ownerPlateInput.value = plate;
   ownerClienteInput.value = service.cliente;
   ownerFechaInput.value = service.fechaService;
-  ownerMesesInput.value = "6";
+  ownerCurrentKmInput.value = service.currentKm || "";
   ownerKmInput.value = service.proximoKm || "";
   if (service.checklist) {
     applyChecklistToForm(service.checklist);
